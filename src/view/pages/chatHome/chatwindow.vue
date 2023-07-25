@@ -37,17 +37,18 @@
               </div>
             </div> 
           </div>-->
-          <div class="chat-friend" v-if="item.uid !== '1001'">
+          <div class="chat-friend" v-if="item.role !== 'user'">
             <div class="info-time">
               <img :src="item.headImg" alt="" />
-              <span>{{ item.name }}</span>
-              <span>{{ item.time }}</span>
+              <span>{{ assistantName }}</span>
+              <span>{{ item.created_at }}</span>
             </div>
-            <div class="chat-text" v-if="item.chatType == 0">
+            <!-- "item.chatType == 0" -->
+            <div class="chat-text" v-if="true">
               <template v-if="isSend && index == chatList.length - 1">
                 <span class="flash_cursor"></span>
               </template>
-              <template v-else><pre>{{ item.msg }}</pre></template>
+              <template v-else><pre>{{ item.content }}</pre></template>
             </div>
             <div class="chat-img" v-if="item.chatType == 1">
               <img :src="item.msg" alt="表情" v-if="item.extend.imgType == 1" style="width: 100px; height: 100px" />
@@ -62,12 +63,12 @@
           </div>
           <div class="chat-me" v-else>
             <div class="info-time">
-              <span>{{ item.name }}</span>
-              <span>{{ item.time }}</span>
+              <span>{{ user }}</span>
+              <span>{{ item.created_at }}</span>
               <img :src="item.headImg" alt="" />
             </div>
-            <div class="chat-text" v-if="item.chatType == 0">
-              {{ item.msg }}
+            <div class="chat-text" v-if="true">
+              {{ item.content }}
             </div>
             <div class="chat-img" v-if="item.chatType == 1">
               <img :src="item.msg" alt="表情" v-if="item.extend.imgType == 1" style="width: 100px; height: 100px" />
@@ -108,7 +109,7 @@
 
 <script>
 import { animation } from "@/util/util";
-import { getChatMsg, chatgpt } from "@/api/getData";
+import { getChatMsg,getSystemChatMsg,getSystemChat, getChat } from "@/api/getData";
 
 import HeadPortrait from "@/components/HeadPortrait";
 import Emoji from "@/components/Emoji";
@@ -119,6 +120,7 @@ export default {
     Emoji,
     FileCard,
   },
+  //props是外部传参
   props: {
     frinedInfo: Object,
     default() {
@@ -127,7 +129,13 @@ export default {
   },
   watch: {
     frinedInfo() {
-      this.getFriendChatMsg();
+      if(this.frinedInfo.create_user=="system")
+      {
+        this.getSystemChatMsg();
+      }
+      else{
+        this.getFriendChatMsg();
+      }
     },
   },
   data() {
@@ -137,24 +145,61 @@ export default {
       showEmoji: false,
       friendInfo: {},
       srcImgList: [],
-      isSend: false
+      isSend: false,
+      user:"",
+      assistantName:""
     };
   },
   mounted() {
-    this.getFriendChatMsg();
+    if(this.frinedInfo.create_user=="system")
+    {
+      this.getSystemChatMsg();
+    }
+    else{
+      this.getFriendChatMsg();
+    }
   },
   methods: {
     //获取聊天记录
     getFriendChatMsg() {
       let params = {
-        frinedId: this.frinedInfo.id,
+        frinedId: this.frinedInfo.id, //马克思
+        user_id:"saiwm623"
       };
+      this.chatList = [];
       getChatMsg(params).then((res) => {
-        this.chatList = res;
+        console.log("历史记录"+res)
+        console.log(res)
+        this.assistantName=res["id"];
+        this.user=res["user"];
+        this.chatList = res["messages"];
+        console.log(this.chatList)
         this.chatList.forEach((item) => {
-          if (item.chatType == 2 && item.extend.imgType == 2) {
-            this.srcImgList.push(item.msg);
-          }
+          // if (item.chatType == 2 && item.extend.imgType == 2) {
+          //   this.srcImgList.push(item.msg);
+          // }
+        });
+        this.scrollBottom();
+
+      });
+    },
+    getSystemChatMsg() {
+      let params = {
+        frinedId: this.frinedInfo.uuid, //马克思
+        user_id:"saiwm623"
+      };
+      this.chatList = [];
+      getSystemChatMsg(params).then((res) => {
+        console.log("历史记录"+res)
+        console.log(res)
+        this.assistantName=res["id"];
+        this.user=res["user"];
+        this.chatList = res["messages"];
+        console.log(this.chatList)
+        this.chatList.forEach((item) => {
+          // if (item.chatType == 2 && item.extend.imgType == 2) {
+          //   this.srcImgList.push(item.msg);
+          // }
         });
         this.scrollBottom();
 
@@ -169,7 +214,7 @@ export default {
     scrollBottom() {
       this.$nextTick(() => {
         const scrollDom = this.$refs.chatContent;
-        animation(scrollDom, scrollDom.scrollHeight - scrollDom.offsetHeight);
+        animation(scrollDom, scrollDom.scrollHeight - scrollDom.offsetHeight-20);
       });
     },
     //关闭标签框
@@ -178,51 +223,117 @@ export default {
     },
     //发送文字信息
     sendText() {
-      if (this.inputMsg) {
+      console.log("this.friendInfo.create_user:",this.frinedInfo)
+      if(this.frinedInfo.create_user=="system")
+      {
+        if (this.inputMsg) {
         let chatMsg = {
-          headImg: require("@/assets/img/head_portrait.jpg"),
-          name: "CSD",
+          headImg: "",
           time: new Date().toLocaleTimeString(),
-          msg: this.inputMsg,
           chatType: 0, //信息类型，0文字，1图片
-          uid: "1001", //uid
+          uuid: "",
+          content: this.inputMsg,
+          role: "user",
+          index: -1,
+          created_at: new Date().toLocaleTimeString(),
+          updated_at: new Date().toLocaleTimeString(),
+          
         };
         this.sendMsg(chatMsg);
-        this.$emit('personCardSort', this.frinedInfo.id)
+        // this.$emit('personCardSort', this.frinedInfo.id)
         this.inputMsg = "";
+        console.log("frinedInfo.id:",this.frinedInfo.id)
         let data = {
-          prompt: chatMsg.msg,
-          temperature: 1,
-          top_p: 1,
-          model: 'text-davinci-003',
-          max_tokens: 2048,
-          frequency_penalty: 0,
-          presence_penalty: 0,
-          stop: ["Human:", "AI:"]
-        }
+          "id": this.frinedInfo.uuid,
+          "message": {
+            "role": "user",
+            "content": this.inputMsg
+          },
+          "user": this.user,
+          "stream": false
+        }
+
         this.loading = true
         this.isSend = true;
-        let chatGPT = {
-          headImg: require("@/assets/img/head_portrait1.png"),
-          name: "chatgpt",
+        let modelResponse = {
+          headImg: "",
+          name: this.assistantName,
           time: new Date().toLocaleTimeString(),
-          msg: "",
-          chatType: 0, //信息类型，0文字，1图片
-          uid: "1002", //uid
+          content: "",    
         };
-        this.sendMsg(chatGPT);
-        chatgpt(data).then((res) => {
-          this.isSend = false;
-          this.chatList[this.chatList.length-1].msg = res.choices[0].text;
+        this.sendMsg(modelResponse);
+
+        getSystemChat(data).then((res) => {
+          console.log("res:");
+          console.log(res);
+          console.log(res["choices"][0]["message"]["content"]);
+          this.chatList[this.chatList.length-1].content = res["choices"][0]["message"]["content"]; //接口不能确认，确认后再完成
+          console.log(this.chatList[this.chatList.length-1].msg);
+          this.isSend = false;  //发送效果取消
         });
-
-
       } else {
         this.$message({
           message: "消息不能为空哦~",
           type: "warning",
         });
       }
+      }
+      else{
+        if (this.inputMsg) {
+        let chatMsg = {
+          headImg: "",
+          time: new Date().toLocaleTimeString(),
+          chatType: 0, //信息类型，0文字，1图片
+          uuid: "",
+          content: this.inputMsg,
+          role: "user",
+          index: -1,
+          created_at: new Date().toLocaleTimeString(),
+          updated_at: new Date().toLocaleTimeString(),
+          
+        };
+        this.sendMsg(chatMsg);
+        // this.$emit('personCardSort', this.frinedInfo.id)
+        this.inputMsg = "";
+        console.log("frinedInfo.id:",this.frinedInfo.id)
+        let data = {
+          "id": this.assistantName,
+          "message": {
+            "role": "user",
+            "content": this.inputMsg
+          },
+          "user": this.user,
+          "stream": false
+        }
+
+        this.loading = true
+        this.isSend = true;
+        let modelResponse = {
+          headImg: "",
+          name: this.assistantName,
+          time: new Date().toLocaleTimeString(),
+          content: "",    
+        };
+        this.sendMsg(modelResponse);
+
+
+        getChat(data).then((res) => {
+          console.log("res:");
+          console.log(res);
+          console.log(res["choices"][0]["message"]["content"]);
+          this.chatList[this.chatList.length-1].content = res["choices"][0]["message"]["content"]; //接口不能确认，确认后再完成
+          console.log(this.chatList[this.chatList.length-1].msg);
+          this.isSend = false;  //发送效果取消
+        });
+      } else {
+        this.$message({
+          message: "消息不能为空哦~",
+          type: "warning",
+        });
+      }
+      }
+
+      
     },
     //发送表情
     sendEmoji(msg) {
@@ -414,7 +525,8 @@ export default {
   .botoom {
     width: 100%;
     height: 70vh;
-    background-color: rgb(50, 54, 68);
+    border: 2px solid #ccc;
+    background-color: rgb(38, 38, 38);
     border-radius: 20px;
     padding: 20px;
     box-sizing: border-box;

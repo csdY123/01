@@ -2,9 +2,7 @@
   <div class="chatHome">
     <div class="chatLeft">
       <div class="title">
-        <h1>万物.ai</h1>
-        <el-tag type="success">欢迎关注零一万物</el-tag>
-        <br/>
+        <span>零一万物.ai</span>
       </div>
       <div class="online-person">
         
@@ -13,7 +11,7 @@
           <div
             class="personList"
             v-for="personInfo in personList"
-            :key="personInfo.id"
+            
             @click="clickPerson(personInfo)"
           >
             <PersonCard
@@ -24,6 +22,17 @@
 
           <span class="onlin-text">AI 角色</span>
 
+          <div
+            class="personList"
+            v-for="characterInfo in characterList"
+            
+            @click="clickCharacter(characterInfo)"
+          >
+            <PersonCard
+              :personInfo="characterInfo"
+              :pcCurrent="characterpcCurrent"
+            ></PersonCard>
+          </div>
 
         </div>
         
@@ -37,7 +46,8 @@
           @personCardSort="personCardSort"
         ></ChatWindow>
       </div>
-      <div class="showIcon" v-else>
+
+      <div class="showIcon" v-else="showChatWindow">
        
         <img src="@/assets/img/snapchat.png" alt="" />
       </div>
@@ -49,8 +59,8 @@
 <script>
 import PersonCard from "@/components/PersonCard.vue";
 import ChatWindow from "./chatwindow.vue";
-
-import { getFriend } from "@/api/getData";
+import { getSys_Characters } from "@/api/getData";
+import { getCharacter } from "@/api/getData";
 export default {
   name: "App",
   components: {
@@ -60,26 +70,57 @@ export default {
   data() {
     return {
       pcCurrent: "",
+      characterpcCurrent:"",
       personList: [],
+      characterOriginalInfo:[],
+      characterList:[],
       showChatWindow: false,
       chatWindowInfo: {},
     };
   },
   mounted() {
-    getFriend().then((res) => {
+    getSys_Characters().then((res) => {
       console.log(res); 
       this.personList = res;
     });
+
+    getCharacter().then((res) => {
+      console.log(res); 
+      this.characterOriginalInfo = res;
+      this.characterList=res["characters"];
+      console.log(this.characterList);
+    });
+
   },
   methods: {
+    // [
+    //     {
+    //         img: "",
+    //         name: "女娲 ",
+    //         detail: "万物.ai 的官方聊天机器人",
+    //         lastMsg: "大萨达萨达所大大萨达",
+    //         id: "1000",
+    //         headImg: require("@/assets/img/女娲.png"),
+
+    //     }
+    //   ]
+    clickCharacter(info) {
+      this.showChatWindow = true;
+      this.chatWindowInfo = info;
+      this.characterInfo = info;
+      this.characterpcCurrent = info.id;
+      console.log("this.characterpcCurrent:",this.characterpcCurrent)
+      this.pcCurrent = "";
+    },
     clickPerson(info) {
       this.showChatWindow = true;
       this.chatWindowInfo = info;
       this.personInfo = info;
       this.pcCurrent = info.id;
+      this.characterpcCurrent = "";
     },
     personCardSort(id) {
-      if (id !== this.personList[0].id) {
+      if (this.characterpcCurrent!=""&& id !== this.personList[0].id) {
         console.log(id);
         let nowPersonInfo;
         for (let i = 0; i < this.personList.length; i++) {
@@ -104,7 +145,12 @@ export default {
     width: 280px;
     .title {
       color: #fff;
-      padding-left: 10px;
+      font-weight: bold;
+      font-size: 35px;
+      padding-left: 8px;
+    }
+    .title_h1{
+      padding-left: 0px;
     }
     .online-person {
       margin-top: 60px;
@@ -142,6 +188,32 @@ export default {
         // color: rgb(28, 30, 44);
       }
     }
+  }
+
+  .beautiful-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+    width: 200px;
+    height: 50px;
+    border-radius: 0%;
+    background-color: #42b983;
+    color: #fff;
+    font-size: 24px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease;
+  }
+
+  .beautiful-button:hover {
+    background-color: #36a174;
+  }
+
+  .beautiful-button:active {
+    background-color: #2b7c5a;
   }
 }
 </style>

@@ -30,9 +30,9 @@ export default {
     return {
       menuList: [
         "icon-xinxi",
+        "icon-shandian",
         "icon-shipin",
         "icon-shu",
-        "icon-shandian",
         "icon-shezhi",
       ],
       current: 0,
@@ -48,7 +48,9 @@ export default {
           }, () => {});
           break;
         case 1:
-          this.$message("该功能还没有开发哦，敬请期待一下吧~🥳");
+          this.$router.push({
+              name: "CreateHome",
+            }, () => {});
           break;
         case 2:
           this.$message("该功能还没有开发哦，敬请期待一下吧~🥳");
@@ -72,6 +74,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.iconfont{
+  color: rgb(255, 255, 255);
+}
 .nav {
   width: 100%;
   height: 90vh;
@@ -90,7 +95,7 @@ export default {
         cursor: pointer;
         position: relative;
         .block {
-          background-color: rgb(29, 144, 245);
+          background-color: rgb(247, 249, 251);
           position: absolute;
           left: -40px;
           width: 6px;
@@ -102,7 +107,7 @@ export default {
         }
         &:hover {
           span {
-            color: rgb(29, 144, 245);
+            color: rgb(245, 247, 250);
           }
           .block {
             opacity: 1;

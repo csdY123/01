@@ -25,7 +25,7 @@ export default {
 .home {
   width: 100vw;
   height: 100vh;
-  background-color: rgb(226, 226, 227);
+  background-color: rgb(38, 38, 38);
   //border-radius: 15px;
   position: absolute;
   left: 50%;

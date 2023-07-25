@@ -19,7 +19,6 @@ axios.interceptors.request.use(
 
 axios.interceptors.response.use(function (response) {
   // Do something with response data
-
   return response
 }, function (error) {
   // Do something with response error
@@ -30,7 +29,10 @@ axios.interceptors.response.use(function (response) {
 
 const base = {
   axios: axios,
-  baseUrl: 'http://localhost:8080'
+  baseUrl: 'http://localhost:8020'
+  
 }
-
+//http://www.lingyiwanwu.com/chat/app
+//baseUrl:'http://35.77.200.82:8000'
+//baseUrl: 'http://localhost:8080'
 export default base

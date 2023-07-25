@@ -1,10 +1,10 @@
 <template>
   <div class="person-card" :class="{ activeCard: personInfo.id == current }">
     <div class="info">
-          <HeadPortrait :imgUrl="personInfo.headImg"></HeadPortrait>
+          <HeadPortrait :imgUrl="personInfo.avatar"></HeadPortrait>
           <div class="info-detail">
             <div class="name">{{ personInfo.name }}</div>
-            <div class="detail">{{ personInfo.detail }}</div>
+            <div class="detail">{{ personInfo.des }}</div>
           </div>
 
     </div>
