@@ -29,7 +29,7 @@ axios.interceptors.response.use(function (response) {
 
 const base = {
   axios: axios,
-  baseUrl: 'http://localhost:8020'
+  baseUrl: 'http://www.lingyiwanwu.com/chat/app'
   
 }
 //http://www.lingyiwanwu.com/chat/app
